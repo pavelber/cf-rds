@@ -23,7 +23,7 @@ params = {
   'VPCId': 'vpc-014df93204c1a2f59',
   'CidrForDbAccess': '10.50.0.0/16',
   'KeyName':'xxxx',
-  'PublicSubnetId':'subnet-0d9688833b0d01280',
+  'PublicSubnetId':'subnet-0f9a7fd795e5fce39',
   'RestoreRoleArn': ''
 }
 
