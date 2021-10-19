@@ -1,0 +1,140 @@
+Parameters:
+  DBInstanceID:
+    Default: mydbinstance
+    Description: My database instance
+    Type: String
+    MinLength: '1'
+    MaxLength: '63'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: >-
+      Must begin with a letter and must not end with a hyphen or contain two
+      consecutive hyphens.
+  DBName:
+    Default: mydb
+    Description: My database
+    Type: String
+    MinLength: '1'
+    MaxLength: '64'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+  DBInstanceClass:
+    Default: db.m5.large
+    Description: DB instance class
+    Type: String
+    ConstraintDescription: Must select a valid DB instance type.
+  DBAllocatedStorage:
+    Default: '50'
+    Description: The size of the database (GiB)
+    Type: Number
+    MinValue: '20'
+    MaxValue: '65536'
+  OpenPortInSecurityGroup:
+    Default: '5432'
+    Description: DB default port
+    Type: Number
+    MinValue: '1024'
+    MaxValue: '65536'
+    ConstraintDescription: must be between 20 and 65536 GiB.
+  DBUsername:
+    NoEcho: 'true'
+    Description: Username for MySQL database access
+    Type: String
+    MinLength: '1'
+    MaxLength: '16'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  DBPassword:
+    NoEcho: 'true'
+    Description: Password MySQL database access
+    Type: String
+    MinLength: '8'
+    MaxLength: '41'
+    AllowedPattern: '[a-zA-Z0-9]*'
+  DBSubnetId1:
+    Description: Subnet id to deploy in
+    Type: String
+  DBSubnetId2:
+    Description: Subnet id to deploy in
+    Type: String
+  VPCId:
+    Description: VPC id to deploy in
+    Type: String
+  CidrForDbAccess:
+    NoEcho: 'true'
+    Description: network mask of hosts allowed to access DB
+    Type: String
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.50.0.0/16
+  IsPublic:
+    Description: Is this DB publicly accessible?
+    Type: String
+    Default: 'false'
+    AllowedValues:
+    - 'true'
+    - 'false'
+  IsProtected:
+    Description: create with deletion protection
+    Type: String
+    Default: 'false'
+    AllowedValues:
+    - 'true'
+    - 'false'
+  IsMultiAZ:
+    Description: is it multi az deployment
+    Type: String
+    Default: 'false'
+    AllowedValues:
+    - 'true'
+    - 'false'
+  DBEngine:
+    Type: String
+    Default: 'postgres'
+  DBEngineVersion:
+    Type: Number
+    Default: 12.3
+    
+    
+Resources:
+  
+  #OptionGroup:
+  #  Type: 'AWS::RDS::OptionGroup'
+    
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPCId
+      GroupDescription: Access DB from VPC only
+      SecurityGroupIngress:
+      - IpProtocol: TCP
+        FromPort: !Ref OpenPortInSecurityGroup
+        ToPort: !Ref OpenPortInSecurityGroup
+        CidrIp: !Ref CidrForDbAccess
+        
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: "DBSubnetGroup For Deployment"
+      SubnetIds:
+        - !Ref DBSubnetId1
+        - !Ref DBSubnetId2
+  
+  MyDB:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      DBInstanceIdentifier: !Ref DBInstanceID
+      DBName: !Ref DBName
+      DBInstanceClass: !Ref DBInstanceClass
+      AllocatedStorage: !Ref DBAllocatedStorage
+      Engine: !Ref DBEngine
+      EngineVersion: !Ref DBEngineVersion
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      PubliclyAccessible: !Ref IsPublic
+      StorageType: standard
+#      StorageEncrypted: true
+ #     KmsKeyId: KeyName
+      DeletionProtection: !Ref IsProtected
+      VPCSecurityGroups: [!Ref DBSecurityGroup]
+      MultiAZ: !Ref IsMultiAZ
+      DBSubnetGroupName: !Ref DBSubnetGroup
+     # OptionGroupName: !Ref OptionGroup
