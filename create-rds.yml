@@ -56,6 +56,9 @@ Parameters:
   DBSubnetId2:
     Description: Subnet id to deploy in
     Type: String
+  PublicSubnetId:
+    Description: Subnet id to deploy bastion in
+    Type: String
   VPCId:
     Description: VPC id to deploy in
     Type: String
@@ -92,6 +95,14 @@ Parameters:
     Type: Number
   RestoreRoleArn:
     Type:String
+  EC2InstanceType:
+    Type: String
+    Default: t2.micro
+  EC2AMI:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  KeyName:
+    Type: String
     
     
 Resources:
@@ -146,7 +157,48 @@ Resources:
       MultiAZ: !Ref IsMultiAZ
       DBSubnetGroupName: !Ref DBSubnetGroup
       OptionGroupName: !Ref OptionGroup
+   
+  BastionInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref EC2AMI
+      InstanceType: !Ref EC2InstanceType
+      KeyName: !Ref KeyName
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref BastionSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-BastionInstance'
+
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription:
+        !Sub 'Security group for ${AWS::StackName} bastion host'
+      VpcId: !Ref VPC
+
+  BastionAllowInboundSSHFromInternet:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: 0.0.0.0/0
+
+  BastionAllowOutboundSSHToApplication:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      IpProtocol: tcp
+      FromPort: !Ref  OpenPortInSecurityGroup
+      ToPort: !Ref OpenPortInSecurityGroup
+      CidrIp: 0.0.0.0/0
  
 Outputs:
   Endpoint:
       Value: !GetAtt 'DBInstance.Endpoint.Address'
+  BastionPublicIp:
+      Description: 'Bastion Public IP'
+      Value: !Sub 'http://${BastionInstance.PublicIp}'

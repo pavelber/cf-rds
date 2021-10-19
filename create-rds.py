@@ -15,10 +15,12 @@ params = {
   'OpenPortInSecurityGroup': '5432',
   'DBUsername': 'bezos',
   'DBPassword': 'rApt0REnge1ne',
-  'DBSubnetId1':'subnet-0718a13efae7851c6',
-  'DBSubnetId2':'subnet-0dfed541b118772ef',
-  'VPCId': 'vpc-0467db844c9d7bdf8',
+  'DBSubnetId1':'subnet-0d9688833b0d01280',
+  'DBSubnetId2':'subnet-06ef17562f044ed15',
+  'VPCId': 'vpc-014df93204c1a2f59',
   'CidrForDbAccess': '10.50.0.0/16',
+  'KeyName':'xxxx',
+  'PublicSubnetId':'subnet-0d9688833b0d01280',
   'RestoreRoleArn': ''
 }
 
