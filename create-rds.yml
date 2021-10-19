@@ -146,6 +146,7 @@ Resources:
       AllocatedStorage: !Ref DBAllocatedStorage
       Engine: !Ref DBEngine
       EngineVersion: !Ref DBEngineVersion
+      LicenseModel: license-included
       MasterUsername: !Ref DBUsername
       MasterUserPassword: !Ref DBPassword
       PubliclyAccessible: !Ref IsPublic
