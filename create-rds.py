@@ -1,13 +1,14 @@
 import json
 import os
-import random
 import subprocess
 import sys
 
 stack_name =  sys.argv[1]
 
 params = {
-  'DBInstanceID': 'test7',
+  'DBEngine': 'postgres',
+  'DBEngineVersion': '12.3',
+  'DBInstanceID': 'test1',
   'DBName': 'test',
   'DBInstanceClass':'db.m5.large',
   'DBAllocatedStorage': '50',
@@ -44,12 +45,20 @@ while True:
     print("Status "+status+"\n")
     if status == 'CREATE_COMPLETE':
         print("Stack created\n")
+        endpoint = status_json["Stacks"][0]["Outputs"][0]["OutputValue"] # If you have more than one output, check OutputKey to be "Endpoint"
         break
     if status in ['CREATE_FAILED','ROLLBACK_COMPLETE']:
         print("Stack failed\n")
         events_params = ['aws', 'cloudformation', 'describe-stack-events', '--stack-name', stack_name] 
         subprocess.run(events_params)
         exit(1)
+        
+my_env = os.environ.copy()
+my_env["PGPASSWORD"] = params["DBPassword"]
+query_params = ['psql','-h',endpoint,'-U',params["DBUsername"],params["DBName"]]
+p = subprocess.Popen(query_params, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)    
+grep_stdout = p.communicate(input=b'select 1;')[0]
+print(grep_stdout.decode())
         
 
 

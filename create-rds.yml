@@ -37,7 +37,7 @@ Parameters:
     ConstraintDescription: must be between 20 and 65536 GiB.
   DBUsername:
     NoEcho: 'true'
-    Description: Username for MySQL database access
+    Description: Username for database access
     Type: String
     MinLength: '1'
     MaxLength: '16'
@@ -45,7 +45,7 @@ Parameters:
     ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
   DBPassword:
     NoEcho: 'true'
-    Description: Password MySQL database access
+    Description: Password database access
     Type: String
     MinLength: '8'
     MaxLength: '41'
@@ -88,10 +88,8 @@ Parameters:
     - 'false'
   DBEngine:
     Type: String
-    Default: 'postgres'
   DBEngineVersion:
     Type: Number
-    Default: 12.3
     
     
 Resources:
@@ -118,7 +116,7 @@ Resources:
         - !Ref DBSubnetId1
         - !Ref DBSubnetId2
   
-  MyDB:
+  DBInstance:
     Type: 'AWS::RDS::DBInstance'
     Properties:
       DBInstanceIdentifier: !Ref DBInstanceID
@@ -138,3 +136,7 @@ Resources:
       MultiAZ: !Ref IsMultiAZ
       DBSubnetGroupName: !Ref DBSubnetGroup
      # OptionGroupName: !Ref OptionGroup
+ 
+Outputs:
+  Endpoint:
+      Value: !GetAtt 'DBInstance.Endpoint.Address'
