@@ -5,6 +5,9 @@ import sys
 
 stack_name =  sys.argv[1]
 
+path_to_ssh_key = '/path/my-key-pair.pem'
+local_tunnel_port = '2323'
+
 params = {
   'DBEngine': 'postgres',
   'DBEngineVersion': '12.3',
@@ -12,7 +15,7 @@ params = {
   'DBName': 'test',
   'DBInstanceClass':'db.m5.large',
   'DBAllocatedStorage': '50',
-  'OpenPortInSecurityGroup': '5432',
+  'DBPort': '5432',
   'DBUsername': 'bezos',
   'DBPassword': 'rApt0REnge1ne',
   'DBSubnetId1':'subnet-0d9688833b0d01280',
@@ -48,7 +51,8 @@ while True:
     print("Status "+status+"\n")
     if status == 'CREATE_COMPLETE':
         print("Stack created\n")
-        endpoint = status_json["Stacks"][0]["Outputs"][0]["OutputValue"] # If you have more than one output, check OutputKey to be "Endpoint"
+        endpoint = status_json["Stacks"][0]["Outputs"][0]["OutputValue"] 
+        bastion_ip = status_json["Stacks"][0]["Outputs"][1]["OutputValue"]
         break
     if status in ['CREATE_FAILED','ROLLBACK_COMPLETE']:
         print("Stack failed\n")
@@ -56,6 +60,14 @@ while True:
         subprocess.run(events_params)
         exit(1)
         
+# Start ssh tunnel
+tunnel_params = ['ssh', '-i', path_to_ssh_key, 'ec2@'+bastion_ip, '-L', local_tunnel_port+':'+endpoint+':'+params["DBPort"]]
+tunnel  = subprocess.run(tunnel_params)
+
+if tunnel.returncode != 0:
+    print("Tunnel creation failed.\n")
+    exit(1)
+
 my_env = os.environ.copy()
 my_env["PGPASSWORD"] = params["DBPassword"]
 query_params = ['psql','-h',endpoint,'-U',params["DBUsername"],params["DBName"]]

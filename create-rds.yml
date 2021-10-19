@@ -28,7 +28,7 @@ Parameters:
     Type: Number
     MinValue: '20'
     MaxValue: '65536'
-  OpenPortInSecurityGroup:
+  DBPort:
     Default: '5432'
     Description: DB default port
     Type: Number
@@ -125,8 +125,8 @@ Resources:
       GroupDescription: Access DB from VPC only
       SecurityGroupIngress:
       - IpProtocol: TCP
-        FromPort: !Ref OpenPortInSecurityGroup
-        ToPort: !Ref OpenPortInSecurityGroup
+        FromPort: !Ref DBPort
+        ToPort: !Ref DBPort
         CidrIp: !Ref CidrForDbAccess
         
   DBSubnetGroup:
@@ -192,8 +192,8 @@ Resources:
     Properties:
       GroupId: !Ref BastionSecurityGroup
       IpProtocol: tcp
-      FromPort: !Ref  OpenPortInSecurityGroup
-      ToPort: !Ref OpenPortInSecurityGroup
+      FromPort: !Ref  DBPort
+      ToPort: !Ref DBPort
       CidrIp: 0.0.0.0/0
  
 Outputs:
