@@ -90,13 +90,23 @@ Parameters:
     Type: String
   DBEngineVersion:
     Type: Number
+  RestoreRoleArn:
+    Type:String
     
     
 Resources:
   
-  #OptionGroup:
-  #  Type: 'AWS::RDS::OptionGroup'
-    
+  OptionGroup:
+    Type: 'AWS::RDS::OptionGroup'
+    Properties: 
+        EngineName: !Ref DBEngine
+        MajorEngineVersion: !Ref DBEngineVersion
+        OptionConfigurations: 
+            - OptionName: SQLSERVER_BACKUP_RESTORE
+              OptionSettings:
+            - Name: IAM_ROLE_ARN
+              Value: 'arn:aws:iam::333333333333333:role/service-role/sqlserverrestore' 
+  
   DBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -135,7 +145,7 @@ Resources:
       VPCSecurityGroups: [!Ref DBSecurityGroup]
       MultiAZ: !Ref IsMultiAZ
       DBSubnetGroupName: !Ref DBSubnetGroup
-     # OptionGroupName: !Ref OptionGroup
+      OptionGroupName: !Ref OptionGroup
  
 Outputs:
   Endpoint:

@@ -18,7 +18,8 @@ params = {
   'DBSubnetId1':'subnet-0718a13efae7851c6',
   'DBSubnetId2':'subnet-0dfed541b118772ef',
   'VPCId': 'vpc-0467db844c9d7bdf8',
-  'CidrForDbAccess': '10.50.0.0/16'
+  'CidrForDbAccess': '10.50.0.0/16',
+  'RestoreRoleArn': ''
 }
 
 params_line = ['ParameterKey=%s,ParameterValue=%s' % (key, value) for (key, value) in params.items()]
